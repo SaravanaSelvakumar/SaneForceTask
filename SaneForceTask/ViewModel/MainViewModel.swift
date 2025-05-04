@@ -58,7 +58,7 @@ class MainViewModel: ObservableObject {
                 "product_code": $0.product_code,
                 "product_name": $0.product_name,
                     "product_unit": $0.product_unit,
-                    "convQty": "\($0.productQty)"
+                    "convQty": $0.convQty
             ] as [String: Any]
         }]
         
