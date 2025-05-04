@@ -10,19 +10,13 @@ import SwiftUI
 struct TaskListView: View {
     @StateObject private var viewModel = MainViewModel()
     @EnvironmentObject var alertViewModel: AlertViewModel
-    private let numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .none
-        return formatter
-    }()
-    @State var quantity: Int = 0
     
     var body: some View {
         NavigationView {
             VStack {
                 List {
                     ForEach(viewModel.products) { product in
-                        listView(products: product, viewModel: viewModel)
+                        ListView(products: product, viewModel: viewModel)
                             .buttonStyle(PlainButtonStyle())
                     }
                 }
@@ -69,28 +63,30 @@ struct TaskListView: View {
 }
 
 
-struct listView:View{
+struct ListView: View {
     @ObservedObject var products: Product
     @ObservedObject var viewModel: MainViewModel
     @EnvironmentObject var alertViewModel: AlertViewModel
     @State var value = 0
-    
-    var body: some View{
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(products.product_name)
                     .font(.headline)
                 Spacer()
-                
             }
-            
+
             HStack(spacing: 10) {
+                // Minus Button
                 Button(action: {
                     let currentQty = products.productQty
                     value = max(currentQty - 1, 0)
                     products.convQty = "\(value)"
-                    if products.productQty < 1 {
-                        alertViewModel.displayAlert(title: "Delete" ,message: "Are you sure you want to delete this item?")
+                    
+                    if value < 1 {
+                        viewModel.productId = products.id  // Set product ID before showing alert
+                        alertViewModel.displayAlert(title: "Delete", message: "Are you sure you want to delete this item?")
                     }
                 }) {
                     Text("-")
@@ -99,7 +95,8 @@ struct listView:View{
                         .foregroundColor(.white)
                         .cornerRadius(4)
                 }
-                
+
+                // Quantity Display
                 Text("\(value)")
                     .frame(width: 36, height: 36)
                     .multilineTextAlignment(.center)
@@ -112,10 +109,11 @@ struct listView:View{
                     )
                     .foregroundColor(Color(hex: "000000"))
                     .font(.system(size: 16, weight: .semibold))
-                    .onAppear{
+                    .onAppear {
                         value = products.productQty
                     }
-                
+
+                // Plus Button
                 Button(action: {
                     value = products.productQty + 1
                     products.convQty = "\(value)"
@@ -126,20 +124,19 @@ struct listView:View{
                         .foregroundColor(.white)
                         .cornerRadius(4)
                 }
-                
+
                 Spacer()
-                
+
+                // Manual Delete Button
                 Button(action: {
                     viewModel.productId = products.id
-                    alertViewModel.displayAlert(title: "Delete" ,message: "Are you sure you want to delete this item?")
+                    alertViewModel.displayAlert(title: "Delete", message: "Are you sure you want to delete this item?")
                 }) {
                     HStack(spacing: 6) {
                         Image(systemName: "trash")
                             .resizable()
                             .frame(width: 15, height: 15)
                             .foregroundColor(.white)
-                        
-                        
                         Text("DEL")
                             .foregroundColor(.white)
                     }
@@ -150,11 +147,6 @@ struct listView:View{
             }
         }
         .padding(.vertical, 8)
-        .onAppear{
-            viewModel.productId = products.id
-        }
-        .onChange(of: value) {
-            viewModel.productId = products.id
-        }
     }
 }
+
