@@ -85,7 +85,7 @@ struct ListView: View {
                     products.convQty = "\(value)"
                     
                     if value < 1 {
-                        viewModel.productId = products.id  // Set product ID before showing alert
+                        viewModel.productId = products.id 
                         alertViewModel.displayAlert(title: "Delete", message: "Are you sure you want to delete this item?")
                     }
                 }) {
